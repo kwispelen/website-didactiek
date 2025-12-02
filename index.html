@@ -1,108 +1,67 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8">
-  <title>Gedempte trilling</title>
+In[19]:= ClearAll["Global`*"]
 
-  <!-- MathJax for pretty formulas -->
-  <script>
-    window.MathJax = {
-      tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
-      svg: {fontCache: 'global'}
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+(*Functies voor verschillende soorten trillingen*)
+trilling[t_, omega_, demping_, A_, B_, C_, vorm_] := 
+ Module[{od, d}, d = demping;
+  od = omega Sqrt[Max[0, 1 - d^2]];(*gedempte hoeksnelheid*)
+  Which[(*Ongedempt:demping=0*)d == 0 && vorm == "Trig", 
+   A Cos[omega t] + B Sin[omega t] + C,(*Onder gedempt:0<d<1*)
+   0 < d < 1 && vorm == "Trig", 
+   Exp[-d t] (A Cos[od t] + B Sin[od t]) + 
+    C,(*Zelfde maar dan in complexe schrijfwijze*)
+   0 < d < 1 && vorm == "Complex", 
+   Exp[-d t] (A Exp[I od t] + B Exp[-I od t]) + C,(*Kritisch gedempt:
+   d=1*)d == 1, Exp[-t] (A + B t) + C,(*Overgedempt:d>1*)d > 1, 
+   Module[{r1, r2}, r1 = -(d - Sqrt[d^2 - 1]);
+    r2 = -(d + Sqrt[d^2 - 1]);
+    A Exp[r1 t] + B Exp[r2 t] + C]]]
 
-  <style>
-    body { font-family: sans-serif; }
-    #formula { margin: 1em 0; font-size: 1.2em; }
-  </style>
-</head>
-<body>
+Manipulate[
+ Pane[Module[{x, regime}, 
+   regime = 
+    Which[demping == 0, "Ongedempt (normale trilling)", 
+     0 < demping < 1, "Onder gedempt (trilling sterft uit)", 
+     demping == 1, "Kritisch gedempt (geen trilling, snel terug)", 
+     demping > 1, "Overgedempt (geen trilling, langzaam terug)"];
+   x[t_] := trilling[t, omega, demping, A, B, C, vorm];
+   Column[{Style["Soort trilling: " <> regime, 16, Bold], 
+     Style["Formule voor de beweging:", 14, Bold], 
+     TraditionalForm[x[t]], 
+     If[vorm === "Complex", 
+      Plot[{Re[x[t]], Im[x[t]]}, {t, 0, tmax}, 
+       PlotLegends -> {"Reëel deel", "Imaginair deel"}, 
+       AxesLabel -> {"t", "x(t)"}, ImageSize -> 500], 
+      Plot[x[t], {t, 0, tmax}, AxesLabel -> {"t", "x(t)"}, 
+       ImageSize -> 500]]}]], 
+  ImageSize -> {900, 600}  (*grootte van het hele output-
+  venster*)], {{omega, 2, "frequentie \[Omega]"}, 0.1, 
+  10}, {{demping, 0.2, "demping (0 = geen)"}, 0, 2}, {{A, 1, "A"}, -5,
+   5}, {{B, 0, "B"}, -5, 5}, {{C, 0, "C (verschuiving)"}, -5, 
+  5}, {{vorm, "Trig", "schrijfwijze"}, {"Trig", "Complex"}}, {{tmax, 
+   20, "tijdbereik"}, 5, 50}]
 
-  <!-- Controls (example; hook these up to your existing sliders) -->
-  <label>ω:
-    <input type="number" id="omega" value="2" step="0.1" onchange="updateFromInputs()">
-  </label>
-  <label>demping d:
-    <input type="number" id="demping" value="0.2" step="0.05" onchange="updateFromInputs()">
-  </label>
-  <label>A:
-    <input type="number" id="A" value="1" step="0.1" onchange="updateFromInputs()">
-  </label>
-  <label>B:
-    <input type="number" id="B" value="0" step="0.1" onchange="updateFromInputs()">
-  </label>
-  <label>C:
-    <input type="number" id="C" value="0" step="0.1" onchange="updateFromInputs()">
-  </label>
-  <label>Schrijfwijze:
-    <select id="vorm" onchange="updateFromInputs()">
-      <option value="Trig">Trig</option>
-      <option value="Complex">Complex</option>
-    </select>
-  </label>
 
-  <!-- This is the analogue of TraditionalForm[x[t]] in Mathematica -->
-  <div id="formula"></div>
+Out[21]= Manipulate[Pane[Module[{x$, regime$}, 
+    regime$ = Which[demping == 0, "Ongedempt (normale trilling)", 
+       0 < demping < 1, "Onder gedempt (trilling sterft uit)", \
+demping == 1, 
+       "Kritisch gedempt (geen trilling, snel terug)", demping > 1, 
+       "Overgedempt (geen trilling, langzaam terug)"]; 
+     x$[t$_] := trilling[t$, omega, demping, A, B, Global`C, vorm]; 
+     Column[{Style[StringJoin["Soort trilling: ", regime$], 16, Bold], 
+       Style["Formule voor de beweging:", 14, Bold], \
+TraditionalForm[x$[t]], 
+       If[vorm === "Complex", Plot[{Re[x$[t]], Im[x$[t]]}, {t, 0, \
+tmax}, 
+         PlotLegends -> {"Reëel deel", "Imaginair deel"}, 
+         AxesLabel -> {"t", "x(t)"}, ImageSize -> 500], 
+        Plot[x$[t], {t, 0, tmax}, AxesLabel -> {"t", "x(t)"}, 
+         ImageSize -> 500]]}]], ImageSize -> {900, 600}], 
+  {{omega, 1.85, "frequentie \[Omega]"}, 0.1, 10}, 
+  {{demping, 1.085, "demping (0 = geen)"}, 0, 2}, {{A, 4.42, "A"}, \
+-5, 5}, 
+  {{B, 0, "B"}, -5, 5}, {{Global`C, 0, "C (verschuiving)"}, -5, 5}, 
+  {{vorm, "Trig", "schrijfwijze"}, {"Trig", "Complex"}}, 
+  {{tmax, 20, "tijdbereik"}, 5, 50}]
 
-  <!-- Your plot container would be here -->
-  <canvas id="plot" width="600" height="400"></canvas>
-
-  <script>
-    function updateFromInputs() {
-      const omega  = parseFloat(document.getElementById('omega').value);
-      const d      = parseFloat(document.getElementById('demping').value);
-      const A      = parseFloat(document.getElementById('A').value);
-      const B      = parseFloat(document.getElementById('B').value);
-      const C      = parseFloat(document.getElementById('C').value);
-      const vorm   = document.getElementById('vorm').value;
-
-      updateFormula(omega, d, A, B, C, vorm);
-      // call your plot-update function here as well
-    }
-
-    function num(x) {
-      return x.toFixed(2);   // nice short numbers in the formula
-    }
-
-    function updateFormula(omega, d, A, B, C, vorm) {
-      const od = omega * Math.sqrt(Math.max(0, 1 - d * d)); // gedempte hoeksnelheid
-      let tex = '';
-
-      if (d === 0 && vorm === 'Trig') {
-        // Ongedempt
-        tex = `x(t) = ${num(A)}\\cos(\\omega t) + ${num(B)}\\sin(\\omega t) + ${num(C)}`;
-      } else if (0 < d && d < 1 && vorm === 'Trig') {
-        // Onder gedempt, trig-vorm
-        tex = `x(t) = e^{-${num(d)} t}\\big(${num(A)}\\cos(\\omega_d t) + ${num(B)}\\sin(\\omega_d t)\\big) + ${num(C)},`
-            + `\\quad \\omega_d = \\omega\\sqrt{1-d^{2}}`;
-      } else if (0 < d && d < 1 && vorm === 'Complex') {
-        // Onder gedempt, complexe schrijfwijze
-        tex = `x(t) = e^{-${num(d)} t}\\big(${num(A)}e^{i\\omega_d t} + ${num(B)}e^{-i\\omega_d t}\\big) + ${num(C)},`
-            + `\\quad \\omega_d = \\omega\\sqrt{1-d^{2}}`;
-      } else if (d === 1) {
-        // Kritisch gedempt
-        tex = `x(t) = e^{-t}\\big(${num(A)} + ${num(B)} t\\big) + ${num(C)}`;
-      } else if (d > 1) {
-        // Overgedempt
-        const r1 = -(d - Math.sqrt(d*d - 1));
-        const r2 = -(d + Math.sqrt(d*d - 1));
-        tex = `x(t) = ${num(A)}e^{${num(r1)} t} + ${num(B)}e^{${num(r2)} t} + ${num(C)},`
-            + `\\quad r_{1,2} = -\\big(d \\mp \\sqrt{d^{2}-1}\\big)`;
-      } else {
-        tex = 'x(t) = \\text{(onbekend regime)}';
-      }
-
-      const formulaDiv = document.getElementById('formula');
-      formulaDiv.innerHTML = `Formule voor de beweging:<br>$$${tex}$$`;
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        MathJax.typesetPromise([formulaDiv]);
-      }
-    }
-
-    // initial render
-    updateFromInputs();
-  </script>
-</body>
-</html>
+Can you adjust the html st it includes the formula of motion like the mathematica?
