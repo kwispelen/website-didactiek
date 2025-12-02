@@ -1,131 +1,108 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Misleidende grafieken in de media – Introductie</title>
+  <meta charset="UTF-8">
+  <title>Gedempte trilling</title>
+
+  <!-- MathJax for pretty formulas -->
+  <script>
+    window.MathJax = {
+      tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
+      svg: {fontCache: 'global'}
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
   <style>
-    body {
-      font-family: sans-serif;
-      max-width: 900px;
-      margin: 20px auto;
-      line-height: 1.6;
-    }
-    header {
-      border-bottom: 1px solid #ccc;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-    }
-    nav a {
-      margin-right: 15px;
-      text-decoration: none;
-      color: #005b99;
-      font-weight: bold;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    h1, h2 {
-      text-align: left;
-    }
-    .box {
-      border: 1px solid #aaa;
-      padding: 12px 15px;
-      margin: 15px 0;
-      background: #f7f7f7;
-      border-radius: 4px;
-    }
-    ul {
-      margin-top: 0;
-    }
-    .learning-goals li {
-      margin-bottom: 4px;
-    }
-    .tag {
-      display: inline-block;
-      padding: 2px 6px;
-      margin-right: 6px;
-      font-size: 0.8rem;
-      border-radius: 3px;
-      background: #eee;
-    }
+    body { font-family: sans-serif; }
+    #formula { margin: 1em 0; font-size: 1.2em; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Online leerarrangement: Misleidende grafieken in de media</h1>
-    <nav>
-      <a href="index.html">Introductie</a>
-      <a href="theorie.html">Theorie & applet</a>
-      <a href="opdracht.html">Opdracht</a>
-      <a href="afronding.html">Afronding</a>
-    </nav>
-  </header>
 
-  <section class="box">
-    <h2>Voor wie is dit arrangement?</h2>
-    <p>
-      Dit online leerarrangement is ontworpen voor leerlingen in de bovenbouw (bijv. havo/vwo 4/5 of mbo),
-      in een vak als natuurkunde, wiskunde of NLT. Het thema is mediawijsheid, met een focus
-      op hoe grafieken in nieuws en social media soms misleidend kunnen zijn.
-    </p>
-    <p>
-      Leerlingen werken grotendeels plaats- en tijdonafhankelijk:
-      ze kunnen de onderdelen thuis of op school doorlopen, op eigen tempo.
-    </p>
-    <p>
-      <span class="tag">Mediawijsheid</span>
-      <span class="tag">Digitale geletterdheid</span>
-      <span class="tag">Grafieken</span>
-      <span class="tag">Natuurkunde / Wiskunde</span>
-    </p>
-  </section>
+  <!-- Controls (example; hook these up to your existing sliders) -->
+  <label>ω:
+    <input type="number" id="omega" value="2" step="0.1" onchange="updateFromInputs()">
+  </label>
+  <label>demping d:
+    <input type="number" id="demping" value="0.2" step="0.05" onchange="updateFromInputs()">
+  </label>
+  <label>A:
+    <input type="number" id="A" value="1" step="0.1" onchange="updateFromInputs()">
+  </label>
+  <label>B:
+    <input type="number" id="B" value="0" step="0.1" onchange="updateFromInputs()">
+  </label>
+  <label>C:
+    <input type="number" id="C" value="0" step="0.1" onchange="updateFromInputs()">
+  </label>
+  <label>Schrijfwijze:
+    <select id="vorm" onchange="updateFromInputs()">
+      <option value="Trig">Trig</option>
+      <option value="Complex">Complex</option>
+    </select>
+  </label>
 
-  <section class="box">
-    <h2>Wat ga je leren?</h2>
-    <ul class="learning-goals">
-      <li>Je herkent voorbeelden van misleidende grafieken in nieuws en social media.</li>
-      <li>Je legt uit hoe de keuze van schaal en weergave een grafiek dramatischer of rustiger kan laten lijken.</li>
-      <li>Je gebruikt een interactieve applet om te onderzoeken hoe veranderingen in parameters de grafiek beïnvloeden.</li>
-      <li>Je beoordeelt bronnen en visualisaties kritisch: wat wil de maker dat jij denkt?</li>
-      <li>Je presenteert je bevindingen digitaal (bijv. via Padlet of LessonUp).</li>
-    </ul>
-  </section>
+  <!-- This is the analogue of TraditionalForm[x[t]] in Mathematica -->
+  <div id="formula"></div>
 
-  <section class="box">
-    <h2>Hoe werkt dit arrangement?</h2>
-    <ol>
-      <li>
-        Introductie (deze pagina): je leest waar de les over gaat en wat je gaat doen.
-      </li>
-      <li>
-        <a href="theorie.html">Theorie & applet</a>:
-        je krijgt uitleg over mediawijsheid en misleidende grafieken en je experimenteert met een applet
-        waarmee je een trilling kunt aanpassen. Je ziet hoe de grafiek verandert als je instellingen wijzigt.
-      </li>
-      <li>
-        <a href="opdracht.html">Opdracht</a>:
-        je onderzoekt een of meer echte (of nagebootste) grafieken uit nieuws / social media en vergelijkt deze
-        met wat je in de applet ziet. Je legt uit of en hoe de grafiek misleidend is.
-      </li>
-      <li>
-        <a href="afronding.html">Afronding</a>:
-        je beantwoordt een korte digitale toets (Forms) en blikt terug op wat je hebt geleerd.
-      </li>
-    </ol>
-    <p>
-      Je werkt bij voorkeur in tweetallen. Je mag zelf kiezen of je eerst de video en uitleg leest
-      of meteen met de applet begint en daarna de tekst erbij neemt: zo kun je je eigen leerroute kiezen.
-    </p>
-  </section>
+  <!-- Your plot container would be here -->
+  <canvas id="plot" width="600" height="400"></canvas>
 
-  <section class="box">
-    <h2>Benodigde tijd & middelen</h2>
-    <ul>
-      <li>Duur: ongeveer 2 lesuren (2 × 50 minuten) of een combinatie van les + huiswerk.</li>
-      <li>Benodigd: laptop / Chromebook / tablet met internet, toegang tot de website en de online tools (Padlet, Forms).</li>
-      <li>Werkvormen: zelfstandig, in tweetallen of kleine groepjes.</li>
-    </ul>
-  </section>
+  <script>
+    function updateFromInputs() {
+      const omega  = parseFloat(document.getElementById('omega').value);
+      const d      = parseFloat(document.getElementById('demping').value);
+      const A      = parseFloat(document.getElementById('A').value);
+      const B      = parseFloat(document.getElementById('B').value);
+      const C      = parseFloat(document.getElementById('C').value);
+      const vorm   = document.getElementById('vorm').value;
 
+      updateFormula(omega, d, A, B, C, vorm);
+      // call your plot-update function here as well
+    }
+
+    function num(x) {
+      return x.toFixed(2);   // nice short numbers in the formula
+    }
+
+    function updateFormula(omega, d, A, B, C, vorm) {
+      const od = omega * Math.sqrt(Math.max(0, 1 - d * d)); // gedempte hoeksnelheid
+      let tex = '';
+
+      if (d === 0 && vorm === 'Trig') {
+        // Ongedempt
+        tex = `x(t) = ${num(A)}\\cos(\\omega t) + ${num(B)}\\sin(\\omega t) + ${num(C)}`;
+      } else if (0 < d && d < 1 && vorm === 'Trig') {
+        // Onder gedempt, trig-vorm
+        tex = `x(t) = e^{-${num(d)} t}\\big(${num(A)}\\cos(\\omega_d t) + ${num(B)}\\sin(\\omega_d t)\\big) + ${num(C)},`
+            + `\\quad \\omega_d = \\omega\\sqrt{1-d^{2}}`;
+      } else if (0 < d && d < 1 && vorm === 'Complex') {
+        // Onder gedempt, complexe schrijfwijze
+        tex = `x(t) = e^{-${num(d)} t}\\big(${num(A)}e^{i\\omega_d t} + ${num(B)}e^{-i\\omega_d t}\\big) + ${num(C)},`
+            + `\\quad \\omega_d = \\omega\\sqrt{1-d^{2}}`;
+      } else if (d === 1) {
+        // Kritisch gedempt
+        tex = `x(t) = e^{-t}\\big(${num(A)} + ${num(B)} t\\big) + ${num(C)}`;
+      } else if (d > 1) {
+        // Overgedempt
+        const r1 = -(d - Math.sqrt(d*d - 1));
+        const r2 = -(d + Math.sqrt(d*d - 1));
+        tex = `x(t) = ${num(A)}e^{${num(r1)} t} + ${num(B)}e^{${num(r2)} t} + ${num(C)},`
+            + `\\quad r_{1,2} = -\\big(d \\mp \\sqrt{d^{2}-1}\\big)`;
+      } else {
+        tex = 'x(t) = \\text{(onbekend regime)}';
+      }
+
+      const formulaDiv = document.getElementById('formula');
+      formulaDiv.innerHTML = `Formule voor de beweging:<br>$$${tex}$$`;
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        MathJax.typesetPromise([formulaDiv]);
+      }
+    }
+
+    // initial render
+    updateFromInputs();
+  </script>
 </body>
 </html>
