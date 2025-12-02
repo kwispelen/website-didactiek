@@ -91,15 +91,10 @@
     .preset-btn:hover {
       background: #eaeaea;
     }
-    #videoPlaceholder {
+    iframe {
       width: 100%;
       height: 250px;
-      border: 1px dashed #aaa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      color: #555;
+      border: none;
       margin-top: 10px;
     }
   </style>
@@ -125,18 +120,22 @@
       misleidend zijn door:
     </p>
     <ul>
-      <li>een <strong>afgesneden y-as</strong> waardoor verschillen groter lijken;</li>
-      <li>het <strong>overslaan van meetpunten</strong> of periodes;</li>
-      <li>het kiezen van een <strong>korte of lange tijdsas</strong> waardoor een trend heel steil of juist heel plat lijkt;</li>
+      <li>een afgesneden y-as waardoor verschillen groter lijken;</li>
+      <li>het overslaan van meetpunten of periodes;</li>
+      <li>het kiezen van een korte of lange tijdsas waardoor een trend heel steil of juist heel plat lijkt;</li>
       <li>het presenteren van alleen een deel van de data.</li>
     </ul>
     <p>
       In deze les gebruik je een natuurkundige context (trillingen en demping), maar het
-      doel is juist om <strong>kritisch naar grafieken</strong> te leren kijken.
+      doel is juist om kritisch naar grafieken te leren kijken.
     </p>
-    <div id="videoPlaceholder">
-      Plaats hier eventueel een uitlegvideo (bijv. YouTube-embed) over misleidende grafieken.
-    </div>
+
+    <!-- YouTube embed -->
+    <iframe 
+      src="https://www.youtube.com/embed/E91bGT9BjYk"
+      title="YouTube video"
+      allowfullscreen>
+    </iframe>
   </section>
 
   <section class="box">
@@ -145,22 +144,22 @@
       Een trilling is een beweging rond een evenwichtsstand. Er zijn verschillende soorten:
     </p>
     <ul>
-      <li><strong>Ongedempt</strong> (geen energieverlies, amplitude blijft gelijk);</li>
-      <li><strong>Onder gedempt</strong> (amplitude neemt langzaam af, het systeem trilt nog);</li>
-      <li><strong>Kritisch gedempt</strong> (grensgeval: snel terug naar evenwicht, zonder oscillaties);</li>
-      <li><strong>Overgedempt</strong> (geen trilling, langzaam terug naar evenwicht).</li>
+      <li>ongedempt (geen energieverlies, amplitude blijft gelijk);</li>
+      <li>onder gedempt (amplitude neemt langzaam af, het systeem trilt nog);</li>
+      <li>kritisch gedempt (grensgeval: snel terug naar evenwicht, zonder oscillaties);</li>
+      <li>overgedempt (geen trilling, langzaam terug naar evenwicht).</li>
     </ul>
     <p class="small-note">
       Let op: de details van de formules zijn minder belangrijk dan het idee dat je
-      met parameters de <strong>vorm van de grafiek</strong> kunt veranderen.
+      met parameters de vorm van de grafiek kunt veranderen.
     </p>
   </section>
 
-  <!-- APPLET-SECTION -->
+  <!-- APPLET -->
   <section id="applet" class="box">
     <h2>3. Interactieve trilling (gedempt / ongedempt)</h2>
     <div class="applet-intro">
-      <strong>Hoe gebruik je deze applet?</strong><br>
+      Hoe gebruik je deze applet?<br>
       Met de schuifjes bepaal je de eigenschappen van de trilling. De grafiek laat
       de uitwijking x(t) als functie van de tijd t zien. Zo kun je zien hoe de
       grafiek verandert als je één parameter aanpast.
@@ -216,7 +215,7 @@
         Laat overgedempte beweging zien
       </button>
       <p class="small-note">
-        Tip: pas daarna steeds maar <strong>één slider tegelijk</strong> aan. Let op
+        Tip: pas daarna steeds maar één slider tegelijk aan. Let op
         hoe de grafiek verandert (vorm, hoogte, snelheid, demping).
       </p>
     </div>
@@ -229,9 +228,9 @@
       onderzoeken. Daarbij kun je deze applet gebruiken als “speeltuin”:
     </p>
     <ul>
-      <li>Hoe verandert jouw indruk van de trilling als je <strong>t<sub>max</sub></strong> heel klein of heel groot maakt?</li>
-      <li>Wat gebeurt er als je de grafiek omhoog of omlaag schuift met <strong>C</strong>?</li>
-      <li>Hoe kun je een rustige trilling “drukker” laten lijken door instellingen te veranderen?</li>
+      <li>Hoe verandert jouw indruk van de trilling als je tmax heel klein of heel groot maakt?</li>
+      <li>Wat gebeurt er als je de grafiek omhoog of omlaag schuift met C?</li>
+      <li>Hoe kun je een rustige trilling drukker laten lijken door instellingen te veranderen?</li>
     </ul>
     <p>
       Denk alvast na: als een journalist of influencer zelf de assen mag kiezen,
@@ -240,6 +239,7 @@
   </section>
 
   <script>
+    /* unchanged JS */
     const omegaSlider = document.getElementById('omega');
     const dempingSlider = document.getElementById('demping');
     const ASlider = document.getElementById('A');
