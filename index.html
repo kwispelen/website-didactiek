@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trillingen met demping – Lesuitleg</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 3fr 1fr;
+      gap: 6px 10px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+    label {
+      text-align: right;
+      padding-right: 5px;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    #canvasContainer {
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+    #info {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .value {
+      text-align: left;
+      font-family: monospace;
+    }
+    .lesson {
+      margin-top: 40px;
+    }
+    .box {
+      border: 1px solid #aaa;
+      padding: 10px 12px;
+      margin: 15px 0;
+      background: #f7f7f7;
+    }
+    .preset-btn {
+      margin-top: 8px;
+      padding: 4px 8px;
+      border: 1px solid #555;
+      background: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    .preset-btn:hover {
+      background: #eaeaea;
+    }
+    .small-note {
+      font-size: 0.9rem;
+      color: #444;
+    }
+    .applet-intro {
+      margin: 20px 0 10px 0;
+      padding: 10px;
+      border-left: 4px solid #888;
+      background: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <h1>Interactieve trilling (gedempt / ongedempt)</h1>
+
+  <!-- APPLET-SECTIE -->
+  <section id="applet">
+    <div class="applet-intro">
+      <strong>Hoe gebruik je deze les?</strong><br>
+      Hieronder zie je een applet. In de uitleg daaronder staan knoppen zoals
+      <em>“Laat zien in de applet”</em>. Als je daarop klikt, worden de sliders
+      automatisch ingesteld zodat je precies dat type trilling ziet waarover het kopje gaat.
+      Probeer daarna zelf de waarden een beetje aan te passen.
+    </div>
+
+    <div class="controls">
+      <label for="omega">frequentie ω</label>
+      <input id="omega" type="range" min="0.1" max="10" step="0.1" value="2">
+      <div class="value" id="omegaVal"></div>
+
+      <label for="demping">demping d</label>
+      <input id="demping" type="range" min="0" max="2" step="0.01" value="0.2">
+      <div class="value" id="dempingVal"></div>
+
+      <label for="A">A</label>
+      <input id="A" type="range" min="-5" max="5" step="0.1" value="1">
+      <div class="value" id="AVal"></div>
+
+      <label for="B">B</label>
+      <input id="B" type="range" min="-5" max="5" step="0.1" value="0">
+      <div class="value" id="BVal"></div>
+
+      <label for="C">C (verschuiving)</label>
+      <input id="C" type="range" min="-5" max="5" step="0.1" value="0">
+      <div class="value" id="CVal"></div>
+
+      <label for="tmax">maximale tijd t</label>
+      <input id="tmax" type="range" min="5" max="50" step="1" value="20">
+      <div class="value" id="tmaxVal"></div>
+    </div>
+
+    <div id="info"></div>
+
+    <div id="canvasContainer">
+      <canvas id="plot" width="800" height="400"></canvas>
+    </div>
+  </section>
+
+  <script>
+    const omegaSlider = document.getElementById('omega');
+    const dempingSlider = document.getElementById('demping');
+    const ASlider = document.getElementById('A');
+    const BSlider = document.getElementById('B');
+    const CSlider = document.getElementById('C');
+    const tmaxSlider = document.getElementById('tmax');
+
+    const omegaVal = document.getElementById('omegaVal');
+    const dempingVal = document.getElementById('dempingVal');
+    const AVal = document.getElementById('AVal');
+    const BVal = document.getElementById('BVal');
+    const CVal = document.getElementById('CVal');
+    const tmaxVal = document.getElementById('tmaxVal');
+
+    const info = document.getElementById('info');
+    const canvas = document.getElementById('plot');
+    const ctx = canvas.getContext('2d');
+
+    function regimeText(d) {
+      if (d === 0) return "Ongedempt (normale trilling)";
+      if (d > 0 && d < 1) return "Onder gedempt (trilling sterft uit)";
+      if (d === 1) return "Kritisch gedempt (geen trilling, snel terug)";
+      if (d > 1) return "Overgedempt (geen trilling, langzaam terug)";
+      return "";
+    }
+
+    function xOfT(t, omega, d, A, B, C) {
+      if (d === 0) {
+        // Ongedempt
+        return A * Math.cos(omega * t) + B * Math.sin(omega * t) + C;
+      } else if (d > 0 && d < 1) {
+        // Onder gedempt
+        const od = omega * Math.sqrt(1 - d * d);
+        return Math.exp(-d * t) *
+               (A * Math.cos(od * t) + B * Math.sin(od * t)) + C;
+      } else if (d === 1) {
+        // Kritisch gedempt
+        return Math.exp(-t) * (A + B * t) + C;
+      } else {
+        // Overgedempt
+        const r1 = -(d - Math.sqrt(d * d - 1));
+        const r2 = -(d + Math.sqrt(d * d - 1));
+        return A * Math.exp(r1 * t) + B * Math.exp(r2 * t) + C;
+      }
+    }
+
+    function updateLabels() {
+      const omega = parseFloat(omegaSlider.value);
+      const d = parseFloat(dempingSlider.value);
+      const A = parseFloat(ASlider.value);
+      const B = parseFloat(BSlider.value);
+      const C = parseFloat(CSlider.value);
+      const tmax = parseFloat(tmaxSlider.value);
+
+      omegaVal.textContent = omega.toFixed(2);
+      dempingVal.textContent = d.toFixed(2);
+      AVal.textContent = A.toFixed(1);
+      BVal.textContent = B.toFixed(1);
+      CVal.textContent = C.toFixed(1);
+      tmaxVal.textContent = tmax.toFixed(0);
+
+      info.textContent = "Soort trilling: " + regimeText(d);
+    }
+
+    function draw() {
+      const omega = parseFloat(omegaSlider.value);
+      const d = parseFloat(dempingSlider.value);
+      const A = parseFloat(ASlider.value);
+      const B = parseFloat(BSlider.value);
+      const C = parseFloat(CSlider.value);
+      const tmax = parseFloat(tmaxSlider.value);
+
+      const N = 600;
+      const ts = [];
+      const xs = [];
+      for (let i = 0; i <= N; i++) {
+        const t = (i / N) * tmax;
+        ts.push(t);
+        xs.push(xOfT(t, omega, d, A, B, C));
+      }
+
+      let xmin = 0;
+      let xmax = tmax;
+      let ymin = Math.min(...xs);
+      let ymax = Math.max(...xs);
+      if (ymax === ymin) {
+        ymax = ymin + 1;
+      }
+
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // x-as (x=0)
+      ctx.beginPath();
+      ctx.strokeStyle = "#888";
+      const yZero = h * (1 - (0 - ymin) / (ymax - ymin));
+      if (yZero >= 0 && yZero <= h) {
+        ctx.moveTo(0, yZero);
+        ctx.lineTo(w, yZero);
+      }
+      ctx.stroke();
+
+      // grafiek
+      ctx.beginPath();
+      ctx.strokeStyle = "#000";
+      for (let i = 0; i <= N; i++) {
+        const t = ts[i];
+        const x = xs[i];
+
+        const px = (t - xmin) / (xmax - xmin) * w;
+        const py = h * (1 - (x - ymin) / (ymax - ymin));
+
+        if (i === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+    }
+
+    function updateAll() {
+      updateLabels();
+      draw();
+    }
+
+    // Knoppen: presets per soort trilling
+    function scrollToApplet() {
+      document.getElementById('applet').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+
+    function setPreset(type) {
+      if (type === 'ongedempt') {
+        dempingSlider.value = 0;
+        omegaSlider.value = 2;
+        ASlider.value = 2;
+        BSlider.value = 0;
+        CSlider.value = 0;
+        tmaxSlider.value = 20;
+      } else if (type === 'ondergedempt') {
+        dempingSlider.value = 0.2;
+        omegaSlider.value = 2;
+        ASlider.value = 2;
+        BSlider.value = 0;
+        CSlider.value = 0;
+        tmaxSlider.value = 20;
+      } else if (type === 'kritisch') {
+        dempingSlider.value = 1.0;
+        omegaSlider.value = 2;
+        ASlider.value = 2;
+        BSlider.value = 1;
+        CSlider.value = 0;
+        tmaxSlider.value = 10;
+      } else if (type === 'overgedempt') {
+        dempingSlider.value = 1.5;
+        omegaSlider.value = 2;
+        ASlider.value = 2;
+        BSlider.value = -1;
+        CSlider.value = 0;
+        tmaxSlider.value = 10;
+      }
+      updateAll();
+      scrollToApplet();
+    }
+
+    // Sliders luisteren naar input
+    [omegaSlider, dempingSlider, ASlider, BSlider, CSlider, tmaxSlider]
+      .forEach(slider => slider.addEventListener('input', updateAll));
+
+    updateAll();
+  </script>
+
+  <!-- LESSECTIE MET KOPJES + KNOPPEN DIE DE APPLET GEBRUIKEN -->
+  <div class="lesson">
+    <h2>Les: Gedempte en ongedempte trillingen</h2>
+
+    <div class="box">
+      <h3>1. Wat is een trilling?</h3>
+      Een trilling is een beweging die zich herhaalt rondom een evenwichtsstand.
+      Denk aan een massa aan een veer, een slinger, of een elektrische resonantiekring.
+      <br><br>
+      <span class="small-note">
+        In de applet zie je de uitwijking x(t) als functie van de tijd t.
+        Straks stel je per soort trilling de schuifjes in.
+      </span>
+    </div>
+
+    <div class="box">
+      <h3>2. Ongedempte trilling (d = 0)</h3>
+      Bij afwezigheid van demping gaat er geen energie verloren: de amplitude blijft constant.
+      Wiskundig beschrijf je dit met:
+      <br>
+      <em>x(t) = A cos(ωt) + B sin(ωt) + C</em>.
+      <ul>
+        <li><strong>A</strong> bepaalt de beginamplitude.</li>
+        <li><strong>B</strong> hangt samen met de beginsnelheid.</li>
+        <li><strong>ω</strong> is de hoeksnelheid (hoe snel de trilling op en neer gaat).</li>
+        <li><strong>C</strong> verschuift het evenwicht omhoog/omlaag.</li>
+      </ul>
+      <button class="preset-btn" onclick="setPreset('ongedempt')">
+        Laat ongedempte trilling zien in de applet
+      </button>
+      <p class="small-note">
+        Opdracht: zet daarna zelf d een klein beetje groter dan 0 en kijk wat er verandert.
+      </p>
+    </div>
+
+    <div class="box">
+      <h3>3. Onder gedempte trilling (0 &lt; d &lt; 1)</h3>
+      Nu is er wél energieverlies (bijvoorbeeld door wrijving), maar het systeem trilt nog steeds.
+      De amplitude wordt steeds kleiner: de trilling “sterft uit”.
+      <br><br>
+      De beweging is:
+      <br>
+      <em>x(t) = e<sup>-dt</sup> [A cos(ω<sub>d</sub> t) + B sin(ω<sub>d</sub> t)] + C</em>,
+      <br>
+      waarbij <em>ω<sub>d</sub> = ω√(1 − d²)</em> de gedempte frequentie is.
+      <br><br>
+      <button class="preset-btn" onclick="setPreset('ondergedempt')">
+        Laat onder gedempte trilling zien in de applet
+      </button>
+      <p class="small-note">
+        Let op hoe de envelop (de maximale uitslag) exponentieel kleiner wordt.
+        Probeer: maak d groter en zie hoe snel de trilling verdwijnt.
+      </p>
+    </div>
+
+    <div class="box">
+      <h3>4. Kritisch gedempt (d = 1)</h3>
+      Dit is de grens tussen “nog trillen” en “niet meer trillen”.
+      <br>
+      De oplossing is:
+      <br>
+      <em>x(t) = e<sup>-t</sup>(A + Bt) + C</em>.
+      <br><br>
+      Het systeem keert zo snel mogelijk naar de evenwichtsstand terug, zonder te oscilleren
+      (zonder overshoot). Dit is bijvoorbeeld gewenst in dempers van auto&apos;s of meetapparatuur.
+      <br><br>
+      <button class="preset-btn" onclick="setPreset('kritisch')">
+        Laat kritisch gedempte beweging zien in de applet
+      </button>
+      <p class="small-note">
+        Vergelijk deze grafiek met de onder gedempte trilling:
+        bij d ≈ 1 zie je dat de oscillaties net verdwijnen.
+      </p>
+    </div>
+
+    <div class="box">
+      <h3>5. Overgedempte trilling (d &gt; 1)</h3>
+      Hier is de demping zo sterk dat er helemaal geen oscillaties meer zijn.
+      De beweging is een som van twee exponentieel dalende termen:
+      <br>
+      <em>x(t) = A e<sup>r₁ t</sup> + B e<sup>r₂ t</sup> + C</em> met <em>r₁</em> en <em>r₂</em> negatief.
+      <br><br>
+      Het systeem keert traag maar zonder overshoot naar de evenwichtsstand terug.
+      <br><br>
+      <button class="preset-btn" onclick="setPreset('overgedempt')">
+        Laat overgedempte beweging zien in de applet
+      </button>
+      <p class="small-note">
+        Vergelijk met d = 1: bij overgedempte beweging duurt het vaak langer voordat
+        het systeem in de buurt van het evenwicht is, maar er treden geen oscillaties op.
+      </p>
+    </div>
+
+    <div class="box">
+      <h3>6. Zelf experimenteren met de sliders</h3>
+      <ul>
+        <li><strong>d</strong>: bepaalt of het systeem trilt (klein d)
+          of alleen terugzakt (groot d).</li>
+        <li><strong>ω</strong>: bepaalt hoe snel het systeem trilt. Probeer ω te vergroten en zie hoe de golven dichter op elkaar komen.</li>
+        <li><strong>A</strong> en <strong>B</strong>: stellen de beginsituatie in
+          (uitwijking en snelheid bij t = 0).</li>
+        <li><strong>C</strong>: verschuift het evenwicht; de hele grafiek gaat omhoog of omlaag.</li>
+        <li><strong>t<sub>max</sub></strong>: kies een groter tijdsvenster om het lange-termijn gedrag
+          te zien.</li>
+      </ul>
+      <p class="small-note">
+        Tip: kies eerst via de knoppen een type trilling en verander daarna steeds één slider tegelijk,
+        zodat je goed ziet welk effect elke parameter heeft.
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
