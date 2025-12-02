@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mediawijsheid – Theorie & applet</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      line-height: 1.6;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+    nav a {
+      text-decoration: none;
+      color: #004f7a;
+      border: 1px solid #004f7a;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }
+    nav a:hover {
+      background: #004f7a;
+      color: #fff;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .box {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 12px 15px;
+      margin: 15px 0;
+      background: #f7f7f7;
+    }
+    .applet-intro {
+      margin: 20px 0 10px 0;
+      padding: 10px;
+      border-left: 4px solid #888;
+      background: #f5f5f5;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 3fr 1fr;
+      gap: 6px 10px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+    label {
+      text-align: right;
+      padding-right: 5px;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    #canvasContainer {
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+    #info {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .value {
+      text-align: left;
+      font-family: monospace;
+    }
+    .small-note {
+      font-size: 0.9rem;
+      color: #444;
+    }
+    .preset-btn {
+      margin-top: 8px;
+      padding: 4px 8px;
+      border: 1px solid #555;
+      background: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    .preset-btn:hover {
+      background: #eaeaea;
+    }
+    #videoPlaceholder {
+      width: 100%;
+      height: 250px;
+      border: 1px dashed #aaa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Theorie & interactieve applet</h1>
+    <p>Trillingen, demping en misleidende grafieken</p>
+  </header>
+
+  <nav>
+    <a href="index.html">Introductie</a>
+    <a href="theorie.html">Theorie & applet</a>
+    <a href="opdracht.html">Opdracht</a>
+    <a href="afronding.html">Afronding</a>
+  </nav>
+
+  <section class="box">
+    <h2>1. Mediawijsheid & grafieken</h2>
+    <p>
+      Mediawijsheid betekent dat je kritisch en bewust omgaat met informatie uit media.
+      Grafieken lijken vaak objectief (“het staat in de data”), maar kunnen toch
+      misleidend zijn door:
+    </p>
+    <ul>
+      <li>een <strong>afgesneden y-as</strong> waardoor verschillen groter lijken;</li>
+      <li>het <strong>overslaan van meetpunten</strong> of periodes;</li>
+      <li>het kiezen van een <strong>korte of lange tijdsas</strong> waardoor een trend heel steil of juist heel plat lijkt;</li>
+      <li>het presenteren van alleen een deel van de data.</li>
+    </ul>
+    <p>
+      In deze les gebruik je een natuurkundige context (trillingen en demping), maar het
+      doel is juist om <strong>kritisch naar grafieken</strong> te leren kijken.
+    </p>
+    <div id="videoPlaceholder">
+      Plaats hier eventueel een uitlegvideo (bijv. YouTube-embed) over misleidende grafieken.
+    </div>
+  </section>
+
+  <section class="box">
+    <h2>2. Trillingen en demping (vakinhoud)</h2>
+    <p>
+      Een trilling is een beweging rond een evenwichtsstand. Er zijn verschillende soorten:
+    </p>
+    <ul>
+      <li><strong>Ongedempt</strong> (geen energieverlies, amplitude blijft gelijk);</li>
+      <li><strong>Onder gedempt</strong> (amplitude neemt langzaam af, het systeem trilt nog);</li>
+      <li><strong>Kritisch gedempt</strong> (grensgeval: snel terug naar evenwicht, zonder oscillaties);</li>
+      <li><strong>Overgedempt</strong> (geen trilling, langzaam terug naar evenwicht).</li>
+    </ul>
+    <p class="small-note">
+      Let op: de details van de formules zijn minder belangrijk dan het idee dat je
+      met parameters de <strong>vorm van de grafiek</strong> kunt veranderen.
+    </p>
+  </section>
+
+  <!-- APPLET-SECTION -->
+  <section id="applet" class="box">
+    <h2>3. Interactieve trilling (gedempt / ongedempt)</h2>
+    <div class="applet-intro">
+      <strong>Hoe gebruik je deze applet?</strong><br>
+      Met de schuifjes bepaal je de eigenschappen van de trilling. De grafiek laat
+      de uitwijking x(t) als functie van de tijd t zien. Zo kun je zien hoe de
+      grafiek verandert als je één parameter aanpast.
+      <br><br>
+      Onder de applet zie je enkele knoppen zoals
+      <em>“Laat ongedempte trilling zien”</em>. Daarmee wordt de applet automatisch
+      ingesteld op een bepaald type trilling. Daarna kun je zelf verder experimenteren.
+    </div>
+
+    <div class="controls">
+      <label for="omega">frequentie ω</label>
+      <input id="omega" type="range" min="0.1" max="10" step="0.1" value="2">
+      <div class="value" id="omegaVal"></div>
+
+      <label for="demping">demping d</label>
+      <input id="demping" type="range" min="0" max="2" step="0.01" value="0.2">
+      <div class="value" id="dempingVal"></div>
+
+      <label for="A">A</label>
+      <input id="A" type="range" min="-5" max="5" step="0.1" value="1">
+      <div class="value" id="AVal"></div>
+
+      <label for="B">B</label>
+      <input id="B" type="range" min="-5" max="5" step="0.1" value="0">
+      <div class="value" id="BVal"></div>
+
+      <label for="C">C (verschuiving)</label>
+      <input id="C" type="range" min="-5" max="5" step="0.1" value="0">
+      <div class="value" id="CVal"></div>
+
+      <label for="tmax">maximale tijd t</label>
+      <input id="tmax" type="range" min="5" max="50" step="1" value="20">
+      <div class="value" id="tmaxVal"></div>
+    </div>
+
+    <div id="info"></div>
+
+    <div id="canvasContainer">
+      <canvas id="plot" width="800" height="400"></canvas>
+    </div>
+
+    <div style="margin-top: 15px;">
+      <button class="preset-btn" onclick="setPreset('ongedempt')">
+        Laat ongedempte trilling zien
+      </button>
+      <button class="preset-btn" onclick="setPreset('ondergedempt')">
+        Laat onder gedempte trilling zien
+      </button>
+      <button class="preset-btn" onclick="setPreset('kritisch')">
+        Laat kritisch gedempte beweging zien
+      </button>
+      <button class="preset-btn" onclick="setPreset('overgedempt')">
+        Laat overgedempte beweging zien
+      </button>
+      <p class="small-note">
+        Tip: pas daarna steeds maar <strong>één slider tegelijk</strong> aan. Let op
+        hoe de grafiek verandert (vorm, hoogte, snelheid, demping).
+      </p>
+    </div>
+  </section>
+
+  <section class="box">
+    <h2>4. Link met misleidende grafieken</h2>
+    <p>
+      In het vervolg van het arrangement ga je grafieken uit nieuws en social media
+      onderzoeken. Daarbij kun je deze applet gebruiken als “speeltuin”:
+    </p>
+    <ul>
+      <li>Hoe verandert jouw indruk van de trilling als je <strong>t<sub>max</sub></strong> heel klein of heel groot maakt?</li>
+      <li>Wat gebeurt er als je de grafiek omhoog of omlaag schuift met <strong>C</strong>?</li>
+      <li>Hoe kun je een rustige trilling “drukker” laten lijken door instellingen te veranderen?</li>
+    </ul>
+    <p>
+      Denk alvast na: als een journalist of influencer zelf de assen mag kiezen,
+      welke instellingen zouden dan kunnen leiden tot een misleidende indruk?
+    </p>
+  </section>
+
+  <script>
+    const omegaSlider = document.getElementById('omega');
+    const dempingSlider = document.getElementById('demping');
+    const ASlider = document.getElementById('A');
+    const BSlider = document.getElementById('B');
+    const CSlider = document.getElementById('C');
+    const tmaxSlider = document.getElementById('tmax');
+
+    const omegaVal = document.getElementById('omegaVal');
+    const dempingVal = document.getElementById('dempingVal');
+    const AVal = document.getElementById('AVal');
+    const BVal = document.getElementById('BVal');
+    const CVal = document.getElementById('CVal');
+    const tmaxVal = document.getElementById('tmaxVal');
+
+    const info = document.getElementById('info');
+    const canvas = document.getElementById('plot');
+    const ctx = canvas.getContext('2d');
+
+    function regimeText(d) {
+      if (d === 0) return "Ongedempt (normale trilling)";
+      if (d > 0 && d < 1) return "Onder gedempt (trilling sterft uit)";
+      if (d === 1) return "Kritisch gedempt (geen trilling, snel terug)";
+      if (d > 1) return "Overgedempt (geen trilling, langzaam terug)";
+      return "";
+    }
+
+    function xOfT(t, omega, d, A, B, C) {
+      if (d === 0) {
+        return A * Math.cos(omega * t) + B * Math.sin(omega * t) + C;
+      } else if (d > 0 && d < 1) {
+        const od = omega * Math.sqrt(1 - d * d);
+        return Math.exp(-d * t) *
+               (A * Math.cos(od * t) + B * Math.sin(od * t)) + C;
+      } else if (d === 1) {
+        return Math.exp(-t) * (A + B * t) + C;
+      } else {
+        const r1 = -(d - Math.sqrt(d * d - 1));
+        const r2 = -(d + Math.sqrt(d * d - 1));
+        return A * Math.exp(r1 * t) + B * Math.exp(r2 * t) + C;
+      }
+    }
+
+    function updateLabels() {
+      const omega = parseFloat(omegaSlider.value);
+      const d = parseFloat(dempingSlider.value);
+      const A = parseFloat(ASlider.value);
+      const B = parseFloat(BSlider.value);
+      const C = parseFloat(CSlider.value);
+      const tmax = parseFloat(tmaxSlider.value);
+
+      omegaVal.textContent = omega.toFixed(2);
+      dempingVal.textContent = d.toFixed(2);
+      AVal.textContent = A.toFixed(1);
+      BVal.textContent = B.toFixed(1);
+      CVal.textContent = C.toFixed(1);
+      tmaxVal.textContent = tmax.toFixed(0);
+
+      info.textContent = "Soort trilling: " + regimeText(d);
+    }
+
+    function draw() {
+      const omega = parseFloat(omegaSlider.value);
+      const d = parseFloat(dempingSlider.value);
+      const A = parseFloat(ASlider.value);
+      const B = parseFloat(BSlider.value);
+      const C = parseFloat(CSlider.value);
+      const tmax = parseFloat(tmaxSlider.value);
+
+      const N = 600;
+      const ts = [];
+      const xs = [];
+      for (let i = 0; i <= N; i++) {
+        const t = (i / N) * tmax;
+        ts.push(t);
+        xs.push(xOfT(t, omega, d, A, B, C));
+      }
+
+      let xmin = 0;
+      let xmax = tmax;
+      let ymin = Math.min(...xs);
+      let ymax = Math.max(...xs);
+      if (ymax === ymin) {
+        ymax = ymin + 1;
+      }
+
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.beginPath();
+      ctx.strokeStyle = "#888";
+      const yZero = h * (1 - (0 - ymin) / (ymax - ymin));
+      if (yZero >= 0 && yZero <= h) {
+        ctx.moveTo(0, yZero);
+        ctx.lineTo(w, yZero);
+      }
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.strokeStyle = "#000";
+      for (let i = 0; i <= N; i++) {
+        const t = ts[i];
+        const x = xs[i];
+
+        const px = (t - xmin) / (xmax - xmin) * w;
+        const py = h * (1 - (x - ymin) / (ymax - ymin));
+
+        if (i === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+    }
+
+    function updateAll() {
+      updateLabels();
+      draw();
+    }
+
+    function setPreset(type) {
+      if (type === 'ongedempt') {
+        dempingSlider.value = 0;
+        omegaSlider.value = 2;
+        ASlider.value = 2;
+        BSlider.value = 0;
+        CSlider.value = 0;
+        tmaxSlider.value = 20;
+      } else if (type === 'ondergedempt') {
+        dempingSlider.value = 0.2;
+        omegaSlider.value = 2;
+        ASlider.value = 2;
+        BSlider.value = 0;
+        CSlider.value = 0;
+        tmaxSlider.value = 20;
+      } else if (type === 'kritisch') {
+        dempingSlider.value = 1.0;
+        omegaSlider.value = 2;
+        ASlider.value = 2;
+        BSlider.value = 1;
+        CSlider.value = 0;
+        tmaxSlider.value = 10;
+      } else if (type === 'overgedempt') {
+        dempingSlider.value = 1.5;
+        omegaSlider.value = 2;
+        ASlider.value = 2;
+        BSlider.value = -1;
+        CSlider.value = 0;
+        tmaxSlider.value = 10;
+      }
+      updateAll();
+      document.getElementById('applet').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+
+    [omegaSlider, dempingSlider, ASlider, BSlider, CSlider, tmaxSlider]
+      .forEach(slider => slider.addEventListener('input', updateAll));
+
+    updateAll();
+  </script>
+</body>
+</html>
