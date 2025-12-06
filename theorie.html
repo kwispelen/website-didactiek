@@ -97,6 +97,10 @@
       border: none;
       margin-top: 10px;
     }
+    input[type="checkbox"] {
+      transform: scale(1.1);
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -107,13 +111,13 @@
 
   <nav>
     <a href="index.html">Introductie</a>
-    <a href="theorie.html">Theorie & applet</a>
+    <a href="theorie.html">Theorie &amp; applet</a>
     <a href="opdracht.html">Opdracht</a>
     <a href="afronding.html">Afronding</a>
   </nav>
 
   <section class="box">
-    <h2>1. Mediawijsheid & grafieken</h2>
+    <h2>1. Mediawijsheid &amp; grafieken</h2>
     <p>
       Mediawijsheid betekent dat je kritisch en bewust omgaat met informatie uit media.
       Grafieken lijken vaak objectief (“het staat in de data”), maar kunnen toch
@@ -193,6 +197,19 @@
       <label for="tmax">maximale tijd t</label>
       <input id="tmax" type="range" min="5" max="50" step="1" value="20">
       <div class="value" id="tmaxVal"></div>
+
+      <!-- NIEUW: eigen y-as instellen -->
+      <label for="customY">eigen y-as</label>
+      <input id="customY" type="checkbox">
+      <div class="value small-note">vink aan om y-as te kiezen</div>
+
+      <label for="ymin">y-min</label>
+      <input id="ymin" type="range" min="-5" max="5" step="0.1" value="-2">
+      <div class="value" id="yminVal"></div>
+
+      <label for="ymax">y-max</label>
+      <input id="ymax" type="range" min="-5" max="5" step="0.1" value="2">
+      <div class="value" id="ymaxVal"></div>
     </div>
 
     <div id="info"></div>
@@ -214,9 +231,18 @@
       <button class="preset-btn" onclick="setPreset('overgedempt')">
         Laat overgedempte beweging zien
       </button>
+      <button class="preset-btn" onclick="setPreset('misleidend')">
+        Voorbeeld misleidende grafiek
+      </button>
       <p class="small-note">
-        Tip: pas daarna steeds maar één slider tegelijk aan. Let op
-        hoe de grafiek verandert (vorm, hoogte, snelheid, demping).
+        Tip: probeer dit in de les: klik eerst op “Laat onder gedempte trilling zien”.
+        Daarna klik je op “Voorbeeld misleidende grafiek”. De trilling is bijna
+        hetzelfde, maar door de keuze van de assen lijkt de beweging veel extremer.
+      </p>
+      <p class="small-note">
+        Pas daarna steeds maar één slider tegelijk aan. Let op
+        hoe de grafiek verandert (vorm, hoogte, snelheid, demping) én hoe je
+        indruk verandert als je de assen anders instelt.
       </p>
     </div>
   </section>
@@ -230,7 +256,8 @@
     <ul>
       <li>Hoe verandert jouw indruk van de trilling als je tmax heel klein of heel groot maakt?</li>
       <li>Wat gebeurt er als je de grafiek omhoog of omlaag schuift met C?</li>
-      <li>Hoe kun je een rustige trilling drukker laten lijken door instellingen te veranderen?</li>
+      <li>Wat gebeurt er als je de y-as “afsnijdt” door eigen y-min en y-max te kiezen?</li>
+      <li>Hoe kun je een rustige trilling drukker, spannender of dramatischer laten lijken?</li>
     </ul>
     <p>
       Denk alvast na: als een journalist of influencer zelf de assen mag kiezen,
@@ -239,30 +266,36 @@
   </section>
 
   <script>
-    /* unchanged JS */
-    const omegaSlider = document.getElementById('omega');
+    const omegaSlider   = document.getElementById('omega');
     const dempingSlider = document.getElementById('demping');
-    const ASlider = document.getElementById('A');
-    const BSlider = document.getElementById('B');
-    const CSlider = document.getElementById('C');
-    const tmaxSlider = document.getElementById('tmax');
+    const ASlider       = document.getElementById('A');
+    const BSlider       = document.getElementById('B');
+    const CSlider       = document.getElementById('C');
+    const tmaxSlider    = document.getElementById('tmax');
 
-    const omegaVal = document.getElementById('omegaVal');
+    const omegaVal   = document.getElementById('omegaVal');
     const dempingVal = document.getElementById('dempingVal');
-    const AVal = document.getElementById('AVal');
-    const BVal = document.getElementById('BVal');
-    const CVal = document.getElementById('CVal');
-    const tmaxVal = document.getElementById('tmaxVal');
+    const AVal       = document.getElementById('AVal');
+    const BVal       = document.getElementById('BVal');
+    const CVal       = document.getElementById('CVal');
+    const tmaxVal    = document.getElementById('tmaxVal');
 
-    const info = document.getElementById('info');
+    // NIEUW: eigen y-as
+    const customYCheckbox = document.getElementById('customY');
+    const yminSlider      = document.getElementById('ymin');
+    const ymaxSlider      = document.getElementById('ymax');
+    const yminVal         = document.getElementById('yminVal');
+    const ymaxVal         = document.getElementById('ymaxVal');
+
+    const info   = document.getElementById('info');
     const canvas = document.getElementById('plot');
-    const ctx = canvas.getContext('2d');
+    const ctx    = canvas.getContext('2d');
 
     function regimeText(d) {
-      if (d === 0) return "Ongedempt (normale trilling)";
+      if (d === 0)       return "Ongedempt (normale trilling)";
       if (d > 0 && d < 1) return "Onder gedempt (trilling sterft uit)";
-      if (d === 1) return "Kritisch gedempt (geen trilling, snel terug)";
-      if (d > 1) return "Overgedempt (geen trilling, langzaam terug)";
+      if (d === 1)      return "Kritisch gedempt (geen trilling, snel terug)";
+      if (d > 1)        return "Overgedempt (geen trilling, langzaam terug)";
       return "";
     }
 
@@ -284,31 +317,34 @@
 
     function updateLabels() {
       const omega = parseFloat(omegaSlider.value);
-      const d = parseFloat(dempingSlider.value);
-      const A = parseFloat(ASlider.value);
-      const B = parseFloat(BSlider.value);
-      const C = parseFloat(CSlider.value);
-      const tmax = parseFloat(tmaxSlider.value);
+      const d     = parseFloat(dempingSlider.value);
+      const A     = parseFloat(ASlider.value);
+      const B     = parseFloat(BSlider.value);
+      const C     = parseFloat(CSlider.value);
+      const tmax  = parseFloat(tmaxSlider.value);
 
-      omegaVal.textContent = omega.toFixed(2);
+      omegaVal.textContent   = omega.toFixed(2);
       dempingVal.textContent = d.toFixed(2);
-      AVal.textContent = A.toFixed(1);
-      BVal.textContent = B.toFixed(1);
-      CVal.textContent = C.toFixed(1);
-      tmaxVal.textContent = tmax.toFixed(0);
+      AVal.textContent       = A.toFixed(1);
+      BVal.textContent       = B.toFixed(1);
+      CVal.textContent       = C.toFixed(1);
+      tmaxVal.textContent    = tmax.toFixed(0);
+
+      yminVal.textContent = yminSlider.value;
+      ymaxVal.textContent = ymaxSlider.value;
 
       info.textContent = "Soort trilling: " + regimeText(d);
     }
 
     function draw() {
       const omega = parseFloat(omegaSlider.value);
-      const d = parseFloat(dempingSlider.value);
-      const A = parseFloat(ASlider.value);
-      const B = parseFloat(BSlider.value);
-      const C = parseFloat(CSlider.value);
-      const tmax = parseFloat(tmaxSlider.value);
+      const d     = parseFloat(dempingSlider.value);
+      const A     = parseFloat(ASlider.value);
+      const B     = parseFloat(BSlider.value);
+      const C     = parseFloat(CSlider.value);
+      const tmax  = parseFloat(tmaxSlider.value);
 
-      const N = 600;
+      const N  = 600;
       const ts = [];
       const xs = [];
       for (let i = 0; i <= N; i++) {
@@ -319,9 +355,16 @@
 
       let xmin = 0;
       let xmax = tmax;
-      let ymin = Math.min(...xs);
-      let ymax = Math.max(...xs);
-      if (ymax === ymin) {
+      let ymin, ymax;
+
+      if (customYCheckbox.checked) {
+        ymin = parseFloat(yminSlider.value);
+        ymax = parseFloat(ymaxSlider.value);
+      } else {
+        ymin = Math.min(...xs);
+        ymax = Math.max(...xs);
+      }
+      if (ymax <= ymin) {
         ymax = ymin + 1;
       }
 
@@ -330,17 +373,78 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      ctx.beginPath();
+      // ASSEN + schaalverdeling
+      ctx.save();
       ctx.strokeStyle = "#888";
-      const yZero = h * (1 - (0 - ymin) / (ymax - ymin));
-      if (yZero >= 0 && yZero <= h) {
-        ctx.moveTo(0, yZero);
-        ctx.lineTo(w, yZero);
-      }
-      ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.font = "12px sans-serif";
+      ctx.fillStyle = "#000";
 
+      // x-as (tijd) bij y=0
+      if (0 >= ymin && 0 <= ymax) {
+        const y0 = h * (1 - (0 - ymin) / (ymax - ymin));
+        ctx.beginPath();
+        ctx.moveTo(0, y0);
+        ctx.lineTo(w, y0);
+        ctx.stroke();
+      }
+
+      // y-as (uitwijking) bij t=0
+      if (xmin <= 0 && 0 <= xmax) {
+        const x0 = (0 - xmin) / (xmax - xmin) * w;
+        ctx.beginPath();
+        ctx.moveTo(x0, 0);
+        ctx.lineTo(x0, h);
+        ctx.stroke();
+      }
+
+      // x-ticks
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      const nTicks = 5;
+      for (let i = 0; i <= nTicks; i++) {
+        const tt = xmin + (i / nTicks) * (xmax - xmin);
+        const px = (tt - xmin) / (xmax - xmin) * w;
+        ctx.beginPath();
+        ctx.moveTo(px, h - 5);
+        ctx.lineTo(px, h);
+        ctx.stroke();
+        ctx.fillText(tt.toFixed(1), px, h - 18);
+      }
+
+      // y-ticks
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      for (let i = 0; i <= nTicks; i++) {
+        const yy = ymin + (i / nTicks) * (ymax - ymin);
+        const py = h * (1 - (yy - ymin) / (ymax - ymin));
+        ctx.beginPath();
+        ctx.moveTo(0, py);
+        ctx.lineTo(5, py);
+        ctx.stroke();
+        ctx.fillText(yy.toFixed(1), 35, py);
+      }
+
+      // as-labels
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText("tijd t", w / 2, h - 2);
+
+      ctx.save();
+      ctx.translate(10, h / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText("uitwijking x(t)", 0, 0);
+      ctx.restore();
+
+      ctx.restore();
+
+      // GRAFIEK zelf
       ctx.beginPath();
       ctx.strokeStyle = "#000";
+      ctx.lineWidth = 1.5;
+
       for (let i = 0; i <= N; i++) {
         const t = ts[i];
         const x = xs[i];
@@ -365,33 +469,56 @@
     function setPreset(type) {
       if (type === 'ongedempt') {
         dempingSlider.value = 0;
-        omegaSlider.value = 2;
-        ASlider.value = 2;
-        BSlider.value = 0;
-        CSlider.value = 0;
-        tmaxSlider.value = 20;
+        omegaSlider.value   = 2;
+        ASlider.value       = 2;
+        BSlider.value       = 0;
+        CSlider.value       = 0;
+        tmaxSlider.value    = 20;
+        customYCheckbox.checked = false;
+
       } else if (type === 'ondergedempt') {
         dempingSlider.value = 0.2;
-        omegaSlider.value = 2;
-        ASlider.value = 2;
-        BSlider.value = 0;
-        CSlider.value = 0;
-        tmaxSlider.value = 20;
+        omegaSlider.value   = 2;
+        ASlider.value       = 2;
+        BSlider.value       = 0;
+        CSlider.value       = 0;
+        tmaxSlider.value    = 20;
+        customYCheckbox.checked = false;
+
       } else if (type === 'kritisch') {
         dempingSlider.value = 1.0;
-        omegaSlider.value = 2;
-        ASlider.value = 2;
-        BSlider.value = 1;
-        CSlider.value = 0;
-        tmaxSlider.value = 10;
+        omegaSlider.value   = 2;
+        ASlider.value       = 2;
+        BSlider.value       = 1;
+        CSlider.value       = 0;
+        tmaxSlider.value    = 10;
+        customYCheckbox.checked = false;
+
       } else if (type === 'overgedempt') {
         dempingSlider.value = 1.5;
-        omegaSlider.value = 2;
-        ASlider.value = 2;
-        BSlider.value = -1;
-        CSlider.value = 0;
-        tmaxSlider.value = 10;
+        omegaSlider.value   = 2;
+        ASlider.value       = 2;
+        BSlider.value       = -1;
+        CSlider.value       = 0;
+        tmaxSlider.value    = 10;
+        customYCheckbox.checked = false;
+
+      } else if (type === 'misleidend') {
+        // CONCREET VOORBEELD MISLEIDENDE GRAFIEK
+        // Bijna dezelfde trilling als ondergedempt,
+        // maar we kiezen een korte tijd en een "afgesneden" y-as.
+        dempingSlider.value = 0.2;
+        omegaSlider.value   = 2;
+        ASlider.value       = 1.2;
+        BSlider.value       = 0;
+        CSlider.value       = 0.8;
+        tmaxSlider.value    = 5;
+
+        customYCheckbox.checked = true;
+        yminSlider.value = 0.7;  // y-as begint niet bij 0 -> vergroot verschillen
+        ymaxSlider.value = 1.1;
       }
+
       updateAll();
       document.getElementById('applet').scrollIntoView({
         behavior: 'smooth',
@@ -399,8 +526,18 @@
       });
     }
 
-    [omegaSlider, dempingSlider, ASlider, BSlider, CSlider, tmaxSlider]
-      .forEach(slider => slider.addEventListener('input', updateAll));
+    [
+      omegaSlider,
+      dempingSlider,
+      ASlider,
+      BSlider,
+      CSlider,
+      tmaxSlider,
+      yminSlider,
+      ymaxSlider
+    ].forEach(el => el.addEventListener('input', updateAll));
+
+    customYCheckbox.addEventListener('change', updateAll);
 
     updateAll();
   </script>
